@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Intercambio de Turnos · Cuidados Críticos</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f5f4f0; --surface:#fff; --s2:#eeece7; --s3:#e4e1da;
+  --line:#d8d4cc; --line2:#bcb8b0;
+  --ink:#16150e; --ink2:#4c4a44; --ink3:#98948c;
+  --blue:#1c4880; --blue-d:#122f58; --blue-l:#dde9f8; --blue-m:#4878b0;
+  --green:#1a5c34; --green-l:#daf0e4; --green-m:#3a9060;
+  --red:#8c1a1a; --red-l:#fce8e8; --red-m:#c04040;
+  --amber:#7c4c0c; --amber-l:#fdf3df; --amber-m:#d08030;
+  --font:'DM Sans',sans-serif; --mono:'DM Mono',monospace;
+  --r:6px; --r2:12px;
+  --sh:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --sh2:0 8px 28px rgba(0,0,0,.10),0 2px 6px rgba(0,0,0,.05);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{height:100%}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;line-height:1.55}
+
+.shell{max-width:720px;margin:0 auto;padding:0 20px 80px}
+
+/* HEADER */
+.app-header{border-bottom:1px solid var(--line);padding:16px 0 14px;margin-bottom:28px;display:flex;align-items:center;gap:14px}
+.brand-icon{width:40px;height:40px;background:var(--blue);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.brand-icon svg{width:22px;height:22px}
+.brand-name{font-size:15px;font-weight:600;letter-spacing:-.02em}
+.brand-sub{font-size:11px;color:var(--ink3);font-family:var(--mono);margin-top:1px}
+
+/* SECTION LABELS */
+.sec{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:9px;margin-bottom:12px;margin-top:24px}
+.sec:first-of-type{margin-top:0}
+.sec::after{content:'';flex:1;height:1px;background:var(--line)}
+.sec-n{width:20px;height:20px;border-radius:50%;background:var(--s3);border:1px solid var(--line);display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+
+/* FORMS */
+.field{margin-bottom:13px}
+.field:last-child{margin-bottom:0}
+.lbl{display:block;font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);margin-bottom:5px}
+
+input[type=text],input[type=email],input[type=date],select{
+  width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:var(--r);
+  font-family:var(--font);font-size:13px;color:var(--ink);background:var(--surface);
+  transition:border .15s,box-shadow .15s;outline:none;-webkit-appearance:none
+}
+input:focus,select:focus{border-color:var(--blue-m);box-shadow:0 0 0 3px rgba(28,72,128,.10)}
+input[type=date]{color-scheme:light}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2398948c'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;padding-right:30px}
+
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 110px;gap:12px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 18px;border-radius:var(--r);font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;border:1px solid transparent;transition:all .15s;white-space:nowrap;line-height:1}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-primary{background:var(--blue);color:#fff;border-color:var(--blue);font-weight:600;font-size:14px;padding:11px 22px}
+.btn-primary:hover:not(:disabled){background:var(--blue-d)}
+.btn-secondary{background:var(--surface);color:var(--ink2);border-color:var(--line)}
+.btn-secondary:hover:not(:disabled){background:var(--s2);border-color:var(--line2)}
+.btn-ghost{background:transparent;color:var(--ink3);border-color:transparent;font-size:12px;padding:7px 10px}
+.btn-ghost:hover{background:var(--s2);color:var(--ink2)}
+.btn-danger{background:var(--red);color:#fff}
+.btn-danger:hover:not(:disabled){background:#6c1010}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-xs{padding:4px 9px;font-size:11px}
+
+/* LEG BLOCKS (Cards inside sections) */
+.leg{background:var(--s2);border:1px solid var(--line);border-radius:var(--r2);padding:15px 16px;margin-bottom:10px}
+.leg:last-child{margin-bottom:0}
+.leg-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}
+.leg-lbl{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}
+
+/* HOURS DISPLAY */
+.hrs-display{
+  display:flex;align-items:center;justify-content:center;
+  height:38px;padding:0 12px;
+  background:var(--s3);border:1px solid var(--line);border-radius:var(--r);
+  font-family:var(--mono);font-size:13px;font-weight:500;color:var(--ink2);
+  user-select:none;
+}
+.hrs-display .hrs-num{font-weight:600;color:var(--ink)}
+.hrs-display .hrs-unit{margin-left:3px;color:var(--ink3);font-size:11px}
+
+/* BALANCE PANEL */
+.balance-panel{border:2px solid var(--line);border-radius:var(--r2);padding:14px 16px;margin:18px 0;transition:border-color .25s,background .25s;position:sticky;top:8px;z-index:10;background:var(--surface);box-shadow:var(--sh)}
+.balance-panel.empty{border-color:var(--line);background:var(--s2)}
+.balance-panel.ok{border-color:var(--green-m);background:var(--green-l)}
+.balance-panel.warn{border-color:var(--amber-m);background:var(--amber-l)}
+.balance-panel.over{border-color:var(--red-m);background:var(--red-l)}
+
+.bp-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.bp-lbl{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);margin-bottom:3px}
+.bp-val{font-family:var(--mono);font-size:30px;font-weight:500;letter-spacing:-.03em;transition:color .25s;color:var(--ink3)}
+.bp-val.ok{color:var(--green)}.bp-val.warn{color:var(--amber)}.bp-val.over{color:var(--red)}
+.bp-msg{font-size:12px;margin-top:3px;transition:color .25s;color:var(--ink3)}
+.bp-msg.ok{color:var(--green)}.bp-msg.warn{color:var(--amber)}.bp-msg.over{color:var(--red)}
+.bp-pills{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;padding-top:9px;border-top:1px solid rgba(0,0,0,.08)}
+.pill{font-family:var(--mono);font-size:11px;font-weight:500;padding:2px 9px;border-radius:11px;border:1px solid}
+.pill.pos{background:var(--green-l);color:var(--green);border-color:var(--green-m)}
+.pill.neg{background:var(--red-l);color:var(--red);border-color:var(--red-m)}
+.pill.zero{background:var(--s3);color:var(--ink3);border-color:var(--line)}
+
+/* NOTICE */
+.notice{padding:10px 14px;border-radius:var(--r);font-size:13px;border:1px solid;line-height:1.6;margin-bottom:8px}
+.notice:last-child{margin-bottom:0}
+.n-warn{background:var(--amber-l);border-color:#e8c888;color:var(--amber)}
+.n-err{background:var(--red-l);border-color:var(--red-m);color:var(--red)}
+
+/* SEND AREA */
+.send-area{background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);padding:18px 20px;margin-top:18px}
+.send-title{font-size:14px;font-weight:600;letter-spacing:-.01em;margin-bottom:3px}
+.send-sub{font-size:12px;color:var(--ink3);margin-bottom:14px}
+.send-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+/* SHIFT TAGS */
+.stag{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:500;padding:2px 7px;border-radius:9px;border:1px solid}
+.stag-M{background:#fffbea;color:#7a5a10;border-color:#e8d48a}
+.stag-T{background:#fff5ee;color:#7a3c10;border-color:#e8c0a0}
+.stag-N{background:#1a1a30;color:#a0a8d8;border-color:#404880}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(10,9,6,.45);display:flex;align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity .2s;padding:20px}
+.overlay.on{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border-radius:14px;padding:26px;width:560px;max-width:100%;max-height:90vh;overflow-y:auto;box-shadow:var(--sh2);transform:translateY(8px) scale(.97);transition:transform .2s}
+.overlay.on .modal{transform:translateY(0) scale(1)}
+.modal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.modal-ttl{font-size:16px;font-weight:600;letter-spacing:-.02em}
+.modal-x{background:none;border:none;font-size:20px;cursor:pointer;color:var(--ink3);line-height:1;padding:2px}
+.modal-x:hover{color:var(--ink)}
+.modal-ft{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+
+/* FLOW ROWS */
+.flow-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--line);flex-wrap:wrap;font-size:13px}
+.flow-row:last-child{border-bottom:none}
+.fw{font-weight:600}
+.farr{color:var(--ink3);font-family:var(--mono);font-size:11px}
+.fhrs{font-family:var(--mono);font-size:11px;margin-left:auto;padding:2px 7px;border-radius:9px;background:var(--s2);border:1px solid var(--line);color:var(--ink2)}
+
+/* SUCCESS */
+.success-screen{display:none;text-align:center;padding:60px 24px 48px}
+.success-screen.on{display:block}
+.success-icon{width:60px;height:60px;background:var(--green-l);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;border:2px solid var(--green-m)}
+.success-h{font-size:21px;font-weight:600;letter-spacing:-.02em;margin-bottom:8px}
+.success-sub{font-size:13px;color:var(--ink3);margin-bottom:24px;line-height:1.6}
+.receipt{background:var(--s2);border:1px dashed var(--line2);border-radius:var(--r2);padding:16px;text-align:left;margin:16px 0}
+.receipt-row{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.receipt-row:last-child{border-bottom:none}
+.rk{font-family:var(--mono);font-size:11px;color:var(--ink3);min-width:80px}
+
+@media(max-width:560px){
+  .g2,.g3{grid-template-columns:1fr}
+  .bp-val{font-size:24px}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<header class="app-header">
+  <div class="brand-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2"/>
+      <path d="M3 10h18M8 2v4M16 2v4M9 16l2 2 4-4"/>
+    </svg>
+  </div>
+  <div>
+    <div class="brand-name">Intercambio de Turnos</div>
+    <div class="brand-sub">Cuidados Críticos Post-Quirúrgicos</div>
+  </div>
+</header>
+
+<div id="mainForm">
+
+  <div class="sec"><span class="sec-n">1</span>Identificación de las personas implicadas</div>
+  
+  <div id="personasContainer"></div>
+  
+  <div class="add-leg-row" style="text-align:left; margin-bottom:24px;">
+    <button class="btn btn-secondary btn-sm" onclick="addPersona()">+ Añadir persona</button>
+  </div>
+
+  <div class="sec"><span class="sec-n">2</span>Turnos del intercambio</div>
+
+  <div id="legsContainer"></div>
+
+  <div class="add-leg-row">
+    <button class="btn btn-secondary btn-sm" onclick="addLeg()">+ Añadir turno</button>
+  </div>
+
+  <div class="balance-panel empty" id="balPanel">
+    <div class="bp-top">
+      <div>
+        <div class="bp-lbl">Balance neto de horas</div>
+        <div class="bp-msg" id="bpMsg">Añada personas y turnos para ver el balance en tiempo real</div>
+      </div>
+      <div class="bp-val" id="bpVal">–</div>
+    </div>
+    <div class="bp-pills" id="bpPills" style="display:none"></div>
+  </div>
+
+  <div class="send-area">
+    <div class="send-title">Enviar solicitud</div>
+    <div class="send-sub" id="sendSub">Complete los campos para activar el envío</div>
+    <div id="sendNotices" style="margin-bottom:10px"></div>
+    <div class="send-row">
+      <button class="btn btn-primary" id="btnSend" disabled onclick="openConfirm()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/></svg>
+        Generar Email de Notificación
+      </button>
+      <button class="btn btn-ghost" onclick="resetAll()">Limpiar todo</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="success-screen" id="successScreen">
+  <div class="success-icon">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+  </div>
+  <div class="success-h">Borrador de email generado</div>
+  <div class="success-sub" id="successMsg">Se ha abierto tu aplicación de correo. Revisa el mensaje y pulsa "Enviar".</div>
+  <div class="receipt" id="successReceipt"></div>
+  
+  <div style="margin-top:16px; margin-bottom:24px; text-align:left">
+    <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px">Resumen de notificaciones</div>
+    <div id="successDest" style="background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:12px; font-size:12px"></div>
+  </div>
+
+  <button class="btn btn-primary" onclick="resetAll()">Nueva solicitud</button>
+</div>
+
+</div><div class="overlay" id="confirmOverlay">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-ttl">Confirmar solicitud de intercambio</div>
+      <button class="modal-x" onclick="closeConfirm()">✕</button>
+    </div>
+
+    <div id="modalOverWarn" class="notice n-warn" style="display:none;margin-bottom:12px"></div>
+
+    <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px">Resumen del intercambio</div>
+    <div id="modalSummary"></div>
+
+    <div style="margin-top:14px;padding:12px;background:var(--s2);border:1px solid var(--line);border-radius:var(--r);font-size:12px">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px">Se preparará un email a:</div>
+      <div id="modalDest"></div>
+    </div>
+
+    <div class="modal-ft">
+      <button class="btn btn-secondary" onclick="closeConfirm()">Volver y revisar</button>
+      <button class="btn btn-primary" id="btnConfirm" onclick="doSend()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/></svg>
+        Abrir correo y generar
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ╔═══════════════════════════════════════════════════════════════════╗
+   ║  CONFIGURACIÓN                                                    ║
+   ╚═══════════════════════════════════════════════════════════════════╝ */
+
+const CONFIG = {
+  supervisor: {
+    nombre: 'Supervisión de Reanimación',
+    email:  'eduardomanuel.amadodeoliveira@osakidetza.eus'
+  },
+  limiteBalance: 3,
+  horas: {
+    'Mañana': 7.17,
+    'Tarde':  7.17,
+    'Noche':  11.17
+  }
+};
+
+/* ─── ESTADO ────────────────────────────────────────────────────── */
+let nextPersonaId = 1;
+let personas = [];
+let legCount = 0;
+let sending  = false;
+
+const STAG_CSS = { 'Mañana':'stag-M', 'Tarde':'stag-T', 'Noche':'stag-N' };
+
+/* ─── INIT ───────────────────────────────────────────────────────── */
+window.addEventListener('DOMContentLoaded', () => {
+  addPersona(); // 1. Yo
+  addPersona(); // 2. Persona implicada
+  addLeg();
+  addLeg();
+  updateBalance();
+  validateForm();
+});
+
+/* ─── PASO 1: PERSONAS ───────────────────────────────────────────── */
+function addPersona() {
+  const pId = nextPersonaId++;
+  const isMe = pId === 1;
+  personas.push({ id: pId, nombre: '', email: '', skip: false });
+  
+  const div = document.createElement('div');
+  div.className = 'leg';
+  div.id = `persona-${pId}`;
+  div.innerHTML = `
+    <div class="leg-hd">
+      <span class="leg-lbl"></span>
+      ${!isMe ? `<button type="button" class="btn btn-xs btn-danger btn-remove-persona" onclick="removePersona(${pId})" style="display:none">✕ Quitar</button>` : ''}
+    </div>
+    <div class="g2" style="margin-bottom:${isMe ? '0' : '10px'}">
+      <div class="field" style="margin-bottom:0">
+        <input type="text" id="pName-${pId}" placeholder="Nombre completo..." oninput="onPersonaChange(${pId}, 'nombre', this.value)">
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <input type="email" id="pEmail-${pId}" placeholder="Email (opcional)..." oninput="onPersonaChange(${pId}, 'email', this.value)">
+      </div>
+    </div>
+    ${!isMe ? `
+    <div style="font-size:12px; display:flex; align-items:center; gap:6px;">
+      <input type="checkbox" id="pSkip-${pId}" onchange="onPersonaChange(${pId}, 'skip', this.checked)">
+      <label for="pSkip-${pId}" style="cursor:pointer; color:var(--ink2)">No notificar a esta persona por email</label>
+    </div>
+    ` : ''}
+  `;
+  
+  document.getElementById('personasContainer').appendChild(div);
+  renumberPersonas();
+  
+  // Foco automático al añadir
+  if (pId > 2) {
+    setTimeout(() => {
+      const el = document.getElementById(`pName-${pId}`);
+      if(el) el.focus();
+    }, 50);
+  }
+}
+
+function removePersona(pId) {
+  personas = personas.filter(p => p.id !== pId);
+  const el = document.getElementById(`persona-${pId}`);
+  if (el) el.remove();
+  renumberPersonas();
+  onChange();
+}
+
+function renumberPersonas() {
+  personas.forEach((p, index) => {
+    const el = document.getElementById(`persona-${p.id}`);
+    if(el) {
+      const lbl = el.querySelector('.leg-lbl');
+      lbl.textContent = index === 0 ? '1. Yo (Solicitante)' : `${index+1}. Persona implicada`;
+      
+      const btn = el.querySelector('.btn-remove-persona');
+      if (btn) btn.style.display = index > 1 ? 'inline-flex' : 'none';
+    }
+  });
+  updateLegSelects();
+}
+
+function onPersonaChange(pId, field, val) {
+  const p = personas.find(x => x.id === pId);
+  if (p) p[field] = val;
+  if (field === 'nombre') {
+    updateLegSelects();
+    onChange();
+  }
+}
+
+function updateLegSelects() {
+  document.querySelectorAll('.leg-select').forEach(sel => {
+    const currentVal = sel.value;
+    
+    let html = '<option value="">Seleccionar...</option>';
+    personas.forEach((p, i) => {
+      const name = p.nombre.trim() || `[Persona sin identificar]`;
+      html += `<option value="${p.id}">${i+1}. ${esc(name)}</option>`;
+    });
+    
+    sel.innerHTML = html;
+    
+    // Restaurar valor previo si la persona sigue existiendo
+    if (currentVal && personas.some(p => p.id.toString() === currentVal)) {
+      sel.value = currentVal;
+    } else {
+      sel.value = "";
+    }
+  });
+}
+
+
+/* ─── PASO 2: TURNOS (LEGS) ──────────────────────────────────────── */
+function addLeg() {
+  legCount++;
+  const idx = legCount;
+  const label = `Turno ${idx}`;
+
+  const tipoOpts = Object.keys(CONFIG.horas)
+    .map(t => `<option value="${t}">${t}</option>`).join('');
+
+  const hrs = CONFIG.horas['Mañana'];
+
+  const div = document.createElement('div');
+  div.className = 'leg';
+  div.id = 'leg-' + idx;
+  div.innerHTML = `
+    <div class="leg-hd">
+      <span class="leg-lbl">${esc(label)}</span>
+      ${idx > 2 ? `<button class="btn btn-xs btn-danger" onclick="removeLeg(${idx})">✕ Quitar</button>` : ''}
+    </div>
+    <div class="g2" style="margin-bottom:11px">
+      <div class="field" style="margin-bottom:0">
+        <span class="lbl">Quien cede el turno</span>
+        <select id="lDe${idx}" class="leg-select" onchange="onChange()"></select>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <span class="lbl">Quien recibe el turno</span>
+        <select id="lA${idx}" class="leg-select" onchange="onChange()"></select>
+      </div>
+    </div>
+    <div class="g3">
+      <div class="field" style="margin-bottom:0">
+        <span class="lbl">Fecha del turno</span>
+        <input type="date" id="lF${idx}" onchange="onChange()">
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <span class="lbl">Tipo</span>
+        <select id="lT${idx}" onchange="onTipoChange(${idx})">${tipoOpts}</select>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <span class="lbl">Duración</span>
+        <div class="hrs-display" id="lH${idx}-display">
+          <span class="hrs-num">${hrs.toFixed(2).replace('.',',')}</span>
+          <span class="hrs-unit">h</span>
+        </div>
+        <input type="hidden" id="lH${idx}" value="${hrs}">
+      </div>
+    </div>`;
+  document.getElementById('legsContainer').appendChild(div);
+  updateLegSelects(); // Poblar los nuevos selects inmediatamente
+}
+
+function removeLeg(idx) {
+  const el = document.getElementById('leg-' + idx);
+  if (el) { el.remove(); onChange(); }
+}
+
+function onTipoChange(idx) {
+  const tipo = document.getElementById('lT'+idx)?.value;
+  const hrs  = CONFIG.horas[tipo];
+  const hidden = document.getElementById('lH'+idx);
+  const display = document.getElementById('lH'+idx+'-display');
+  if (hidden && hrs != null) hidden.value = hrs;
+  if (display && hrs != null) {
+    display.innerHTML = `<span class="hrs-num">${hrs.toFixed(2).replace('.',',')}</span><span class="hrs-unit">h</span>`;
+  }
+  onChange();
+}
+
+/* ─── COLLECT & BALANCE ──────────────────────────────────────────── */
+function collectLegs() {
+  const legs = [];
+  document.querySelectorAll('[id^="leg-"]').forEach(block => {
+    const idx = block.id.replace('leg-','');
+    const deId = parseInt(document.getElementById('lDe'+idx)?.value);
+    const aId  = parseInt(document.getElementById('lA'+idx)?.value);
+    const f  = document.getElementById('lF'+idx)?.value || '';
+    const t  = document.getElementById('lT'+idx)?.value || 'Mañana';
+    const h  = parseFloat(document.getElementById('lH'+idx)?.value) || 0;
+    
+    if (!isNaN(deId) || !isNaN(aId) || f) {
+      legs.push({ idx, deId, aId, fecha: f, tipo: t, horas: h });
+    }
+  });
+  return legs;
+}
+
+function computeBalance(legs) {
+  const bal = {};
+  legs.forEach(l => {
+    if (!isNaN(l.deId)) bal[l.deId] = (bal[l.deId] || 0) - l.horas;
+    if (!isNaN(l.aId))  bal[l.aId]  = (bal[l.aId]  || 0) + l.horas;
+  });
+  return bal;
+}
+
+function onChange() { 
+  updateBalance(); 
+  validateForm(); 
+}
+
+function updateBalance() {
+  const legs  = collectLegs();
+  const bal   = computeBalance(legs);
+  const ents  = Object.entries(bal);
+  const lim   = CONFIG.limiteBalance;
+  const panel = document.getElementById('balPanel');
+  const valEl = document.getElementById('bpVal');
+  const msgEl = document.getElementById('bpMsg');
+  const pills = document.getElementById('bpPills');
+
+  if (!ents.length) {
+    panel.className = 'balance-panel empty';
+    valEl.className = 'bp-val';
+    msgEl.className = 'bp-msg';
+    valEl.textContent = '–';
+    msgEl.textContent = 'Añada personas y turnos para ver el balance en tiempo real';
+    pills.style.display = 'none';
+    return;
+  }
+
+  const netAbs = ents.reduce((s,[,v]) => s + Math.abs(v), 0);
+  const isZero = Math.abs(netAbs) < 0.01;
+  const isOver = netAbs > lim;
+
+  if (isZero) {
+    panel.className = 'balance-panel ok';
+    valEl.className = 'bp-val ok'; msgEl.className = 'bp-msg ok';
+    valEl.textContent = '✓ 0 h';
+    msgEl.textContent = 'Balance perfecto — los participantes están en equilibrio.';
+  } else if (isOver) {
+    panel.className = 'balance-panel over';
+    valEl.className = 'bp-val over'; msgEl.className = 'bp-msg over';
+    valEl.textContent = fmtHrs(netAbs);
+    msgEl.textContent = `⚠ Supera el límite de ±${lim} h. Revise los turnos antes de enviar.`;
+  } else {
+    panel.className = 'balance-panel warn';
+    valEl.className = 'bp-val warn'; msgEl.className = 'bp-msg warn';
+    valEl.textContent = fmtHrs(netAbs);
+    msgEl.textContent = `Diferencia de ${fmtHrs(netAbs)} entre los participantes.`;
+  }
+
+  pills.style.display = 'flex';
+  pills.innerHTML = ents.map(([idStr, v]) => {
+    const id = parseInt(idStr);
+    const p = personas.find(x => x.id === id);
+    if (!p) return '';
+    const name = p.nombre.trim() || `Persona ${personas.indexOf(p)+1}`;
+    
+    const cls = v > 0.01 ? 'pos' : v < -0.01 ? 'neg' : 'zero';
+    const sign = v > 0 ? '+' : '';
+    return `<span class="pill ${cls}">${esc(name)}: ${sign}${fmtHrs(v)}</span>`;
+  }).join('');
+}
+
+/* ─── VALIDATION ─────────────────────────────────────────────────── */
+function validateForm() {
+  const legs   = collectLegs();
+  const sol    = personas[0].nombre.trim();
+  const lim    = CONFIG.limiteBalance;
+  const errors = [], warns = [];
+
+  if (!sol) errors.push('Indique su nombre en el apartado 1. Yo (Solicitante).');
+
+  // Asegurar que todos los campos de nombre añadidos estén rellenos
+  personas.forEach((p, i) => {
+    if (i > 0 && !p.nombre.trim()) {
+      errors.push(`Identificación ${i+1}: Indique el nombre de la persona implicada.`);
+    }
+  });
+
+  let hasData = false;
+  legs.forEach((l, i) => {
+    if (!isNaN(l.deId) || !isNaN(l.aId) || l.fecha) hasData = true;
+    if (isNaN(l.deId)) errors.push(`Turno ${i+1}: indique quién cede el turno.`);
+    if (isNaN(l.aId))  errors.push(`Turno ${i+1}: indique quién recibe el turno.`);
+    if (!isNaN(l.deId) && !isNaN(l.aId) && l.deId === l.aId)
+      errors.push(`Turno ${i+1}: quien cede y quien recibe no pueden ser la misma persona.`);
+    if (!l.fecha) errors.push(`Turno ${i+1}: indique la fecha del turno.`);
+  });
+
+  if (!hasData) errors.push('Rellene al menos un turno de intercambio.');
+
+  if (hasData && legs.length) {
+    const netAbs = Object.values(computeBalance(legs)).reduce((s,v)=>s+Math.abs(v),0);
+    if (netAbs > lim)
+      warns.push(`El balance supera el límite de ±${lim} h. Puede enviarse, pero requiere revisión.`);
+  }
+
+  const sn = document.getElementById('sendNotices');
+  sn.innerHTML = [
+    ...errors.map(e => `<div class="notice n-err">✕ ${esc(e)}</div>`),
+    ...warns.map(w  => `<div class="notice n-warn">⚠ ${esc(w)}</div>`)
+  ].join('');
+
+  const canSend = errors.length === 0 && hasData && legs.length > 0;
+  document.getElementById('btnSend').disabled = !canSend;
+  document.getElementById('sendSub').textContent = canSend
+    ? `Listo — ${legs.length} turno${legs.length>1?'s':''} · Destino: ${CONFIG.supervisor.email}`
+    : errors.length > 0 ? 'Corrija los errores indicados' : 'Complete los campos';
+}
+
+/* ─── CONFIRM MODAL ──────────────────────────────────────────────── */
+function openConfirm() {
+  const legs   = collectLegs();
+  const bal    = computeBalance(legs);
+  const lim    = CONFIG.limiteBalance;
+  const netAbs = Object.values(bal).reduce((s,v)=>s+Math.abs(v),0);
+  const isOver = netAbs > lim;
+
+  let sumHtml = '';
+  legs.forEach(l => {
+    const deP = personas.find(x => x.id === l.deId);
+    const aP  = personas.find(x => x.id === l.aId);
+    const deName = deP ? deP.nombre.trim() : '?';
+    const aName  = aP ? aP.nombre.trim() : '?';
+
+    sumHtml += `<div class="flow-row">
+      <span class="fw">${esc(deName)}</span>
+      <span class="farr">→</span>
+      <span class="fw">${esc(aName)}</span>
+      <span style="color:var(--ink3);font-size:12px">${fmtDate(l.fecha)}</span>
+      <span class="stag ${STAG_CSS[l.tipo]||''}">${esc(l.tipo)}</span>
+      <span class="fhrs">${fmtHrs(l.horas)}</span>
+    </div>`;
+  });
+  
+  sumHtml += `<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:10px">
+    ${Object.entries(bal).map(([idStr,v])=>{
+      const id = parseInt(idStr);
+      const p = personas.find(x => x.id === id);
+      const name = p ? p.nombre.trim() : '?';
+      const cls = v>0.01?'pos':v<-0.01?'neg':'zero';
+      return `<span class="pill ${cls}">${esc(name)}: ${v>0?'+':''}${fmtHrs(v)}</span>`;
+    }).join('')}
+  </div>`;
+  document.getElementById('modalSummary').innerHTML = sumHtml;
+
+  const warnEl = document.getElementById('modalOverWarn');
+  if (isOver) {
+    warnEl.style.display = 'block';
+    warnEl.textContent = `⚠ El balance neto (${fmtHrs(netAbs)}) supera el límite de ±${lim} h. Puede enviarse igualmente.`;
+  } else {
+    warnEl.style.display = 'none';
+  }
+
+  let destHtml = `<div style="margin-bottom:6px;display:flex;align-items:center;gap:6px;font-size:12px;flex-wrap:wrap">
+    <span style="font-size:16px">👩‍⚕️</span>
+    <strong>${esc(CONFIG.supervisor.nombre)}</strong>
+    <span style="font-family:var(--mono);color:var(--ink3)">${esc(CONFIG.supervisor.email)}</span>
+    <span style="font-size:10px;background:var(--blue-l);color:var(--blue);border:1px solid #a8c4e8;border-radius:8px;padding:1px 7px;font-weight:600">SUPERVISOR</span>
+  </div>`;
+
+  personas.forEach((p, i) => {
+    const name = p.nombre.trim() || `Persona ${i+1}`;
+    if (p.skip) {
+      destHtml += `<div style="display:flex;align-items:center;gap:6px;font-size:12px;padding:3px 0;flex-wrap:wrap;color:var(--ink3)">
+        <span style="font-size:14px">❌</span>
+        <strong style="text-decoration:line-through">${esc(name)}</strong>
+        <span>(No notificar)</span>
+      </div>`;
+    } else {
+      destHtml += `<div style="display:flex;align-items:center;gap:6px;font-size:12px;padding:3px 0;flex-wrap:wrap">
+        <span style="font-size:14px">👤</span>
+        <strong>${esc(name)} ${i===0 ? '(Solicitante)' : ''}</strong>
+        <span style="font-family:var(--mono);color:var(--ink3)">${p.email.trim() ? esc(p.email.trim()) : 'Sin email indicado'}</span>
+      </div>`;
+    }
+  });
+
+  document.getElementById('modalDest').innerHTML = destHtml;
+  document.getElementById('confirmOverlay').classList.add('on');
+}
+
+function closeConfirm() {
+  document.getElementById('confirmOverlay').classList.remove('on');
+}
+
+/* ─── SEND ───────────────────────────────────────────────────────── */
+function doSend() {
+  if (sending) return;
+  sending = true;
+
+  const btnC = document.getElementById('btnConfirm');
+  btnC.disabled = true;
+  
+  const legs       = collectLegs();
+  const bal        = computeBalance(legs);
+  const netAbs     = Object.values(bal).reduce((s,v)=>s+Math.abs(v),0);
+  const isOver     = netAbs > CONFIG.limiteBalance;
+  const id         = 'SOL-' + Date.now();
+  const ts         = new Date().toISOString();
+  
+  const sol = personas[0].nombre.trim();
+
+  const payload = {
+    id,
+    solicitante: sol,
+    fechaEnvio:  ts,
+    balanceNeto: (isOver ? 'ALERTA ' : '') + fmtHrs(netAbs),
+    alerta:      isOver ? `Supera limite +-${CONFIG.limiteBalance} h` : '',
+    turnos: legs.map((l,i) => {
+      const deP = personas.find(x => x.id === l.deId);
+      const aP  = personas.find(x => x.id === l.aId);
+      return {
+        turno: i+1, 
+        cede: deP ? deP.nombre.trim() : '', 
+        recibe: aP ? aP.nombre.trim() : '',
+        fecha: l.fecha, 
+        tipo: l.tipo, 
+        horas: l.horas
+      };
+    }),
+    balance: Object.entries(bal).map(([idStr, v]) => {
+      const pId = parseInt(idStr);
+      const p = personas.find(x => x.id === pId);
+      return {
+        trabajador: p ? p.nombre.trim() : '', 
+        horas: parseFloat(v.toFixed(2))
+      };
+    })
+  };
+
+  // Recopilar correos para Copia (CC)
+  const ccEmails = [];
+  personas.forEach(p => {
+    if (!p.skip && p.email.trim() !== '') {
+      ccEmails.push(p.email.trim());
+    }
+  });
+
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  const hh = String(now.getHours()).padStart(2, '0');
+  const min = String(now.getMinutes()).padStart(2, '0');
+  const dateStr = `${yyyy}${mm}${dd}${hh}${min}`;
+
+  const subject = encodeURIComponent(`[Intercambio Turnos] ${dateStr}_${sol}`);
+  const body    = encodeURIComponent(buildEmailPlain(payload));
+  
+  let mailtoStr = `mailto:${CONFIG.supervisor.email}?subject=${subject}`;
+  if (ccEmails.length > 0) {
+    mailtoStr += `&cc=${ccEmails.join(',')}`;
+  }
+  mailtoStr += `&body=${body}`;
+
+  // Método robusto para forzar la apertura del cliente de correo
+  const enlaceOculto = document.createElement('a');
+  enlaceOculto.href = mailtoStr;
+  document.body.appendChild(enlaceOculto);
+  enlaceOculto.click();
+  document.body.removeChild(enlaceOculto);
+  
+  setTimeout(() => {
+    showSuccess(id, legs, bal);
+  }, 600);
+
+  sending = false;
+  btnC.disabled = false;
+  closeConfirm();
+}
+
+/* ─── EMAIL PLAIN ────────────────────────────────────────────────── */
+function buildEmailPlain(p) {
+  let t = `TURNOS\n----------------------------------------\n`;
+  p.turnos.forEach((tr, i) => {
+    t += `Turno ${tr.turno}: ${tr.cede} -> ${tr.recibe}\n`;
+    t += `  Fecha: ${tr.fecha}  |  Tipo: ${tr.tipo}\n`;
+    if (i < p.turnos.length - 1) t += `\n`;
+  });
+  t += `\nBALANCE NETO\n----------------------------------------\n`;
+  p.balance.forEach(b => { t += `${b.trabajador}: ${b.horas>0?'+':''}${fmtHrs(b.horas)}\n`; });
+  t += `\nTotal: ${p.balanceNeto}\n`;
+  if (p.alerta) t += `\nALERTA: ${p.alerta}\n`;
+  return t;
+}
+
+/* ─── SUCCESS SCREEN ─────────────────────────────────────────────── */
+function showSuccess(id, legs, bal) {
+  document.getElementById('mainForm').style.display = 'none';
+  const ss = document.getElementById('successScreen');
+  ss.classList.add('on');
+
+  let html = `<div style="font-family:var(--mono);font-size:10px;color:var(--ink3);margin-bottom:8px">${esc(id)}</div>`;
+  legs.forEach(l => {
+    const deP = personas.find(x => x.id === l.deId);
+    const aP  = personas.find(x => x.id === l.aId);
+    const deName = deP ? deP.nombre.trim() : '?';
+    const aName  = aP ? aP.nombre.trim() : '?';
+
+    html += `<div class="receipt-row">
+      <span class="rk">${esc(deName)}</span>
+      <span style="color:var(--ink3);font-size:11px">→</span>
+      <span style="font-weight:600">${esc(aName)}</span>
+      <span style="margin-left:auto;display:flex;align-items:center;gap:6px">
+        <span style="color:var(--ink3);font-size:11px">${fmtDate(l.fecha)}</span>
+        <span class="stag ${STAG_CSS[l.tipo]||''}">${esc(l.tipo)}</span>
+        <span style="font-family:var(--mono);font-size:11px">${fmtHrs(l.horas)}</span>
+      </span>
+    </div>`;
+  });
+  html += `<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;padding-top:8px;border-top:1px solid var(--line)">
+    ${Object.entries(bal).map(([idStr,v])=>{
+      const pId = parseInt(idStr);
+      const p = personas.find(x => x.id === pId);
+      const name = p ? p.nombre.trim() : '?';
+      const cls=v>0.01?'pos':v<-0.01?'neg':'zero';
+      return `<span class="pill ${cls}">${esc(name)}: ${v>0?'+':''}${fmtHrs(v)}</span>`;
+    }).join('')}
+  </div>`;
+  document.getElementById('successReceipt').innerHTML = html;
+
+  let destHtml = `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;flex-wrap:wrap">
+    <span style="font-size:14px">👩‍⚕️</span>
+    <strong>${esc(CONFIG.supervisor.nombre)}</strong>
+    <span style="font-family:var(--mono);color:var(--ink3)">${esc(CONFIG.supervisor.email)}</span>
+  </div>`;
+  
+  personas.forEach((p, i) => {
+    const name = p.nombre.trim() || `Persona ${i+1}`;
+    if (p.skip) {
+      destHtml += `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;flex-wrap:wrap;color:var(--ink3)">
+        <span style="font-size:14px">❌</span>
+        <strong style="text-decoration:line-through">${esc(name)}</strong>
+        <span>(No notificado)</span>
+      </div>`;
+    } else {
+      destHtml += `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;flex-wrap:wrap">
+        <span style="font-size:14px">👤</span>
+        <strong>${esc(name)} ${i===0 ? '(Solicitante)' : ''}</strong>
+        <span style="font-family:var(--mono);color:var(--ink3)">${p.email.trim() ? esc(p.email.trim()) : 'Sin email'}</span>
+      </div>`;
+    }
+  });
+  document.getElementById('successDest').innerHTML = destHtml;
+}
+
+/* ─── RESET ──────────────────────────────────────────────────────── */
+function resetAll() {
+  personas = [];
+  nextPersonaId = 1;
+  document.getElementById('personasContainer').innerHTML = '';
+  addPersona();
+  addPersona();
+  
+  legCount = 0;
+  document.getElementById('legsContainer').innerHTML = '';
+  addLeg(); addLeg();
+  
+  document.getElementById('sendNotices').innerHTML = '';
+  document.getElementById('btnSend').disabled = true;
+  document.getElementById('sendSub').textContent = 'Complete los campos para activar el envío';
+  document.getElementById('mainForm').style.display = 'block';
+  document.getElementById('successScreen').classList.remove('on');
+  updateBalance();
+  validateForm();
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtDate(iso) { if (!iso) return '–'; try { const [y,m,d]=iso.split('-'); return `${d}/${m}/${y}`; } catch { return iso; } }
+function fmtHrs(v) { if (v == null) return '0 h'; const abs = Math.abs(v); return (v < 0 ? '-' : '') + abs.toFixed(2).replace('.',',') + ' h'; }
+</script>
+</body>
+</html>

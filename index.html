@@ -110,6 +110,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 .notice:last-child{margin-bottom:0}
 .n-warn{background:var(--amber-l);border-color:#e8c888;color:var(--amber)}
 .n-err{background:var(--red-l);border-color:var(--red-m);color:var(--red)}
+.n-ok{background:var(--green-l);border-color:var(--green-m);color:var(--green)}
 
 /* SEND AREA */
 .send-area{background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);padding:18px 20px;margin-top:18px}
@@ -151,6 +152,32 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 .receipt-row{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px;border-bottom:1px solid var(--line);flex-wrap:wrap}
 .receipt-row:last-child{border-bottom:none}
 .rk{font-family:var(--mono);font-size:11px;color:var(--ink3);min-width:80px}
+
+/* ENVÍO MANUAL — caja en pantalla de éxito */
+.manual-box{background:var(--amber-l);border:1px solid #e8c888;border-radius:var(--r2);padding:16px 18px;margin:0 0 24px;text-align:left}
+.manual-box-t{font-size:14px;font-weight:600;color:var(--amber);margin-bottom:3px}
+.manual-box-s{font-size:12px;color:var(--ink2);margin-bottom:12px}
+
+/* ENVÍO MANUAL — aviso con instrucciones */
+.m-hint{font-size:12px;color:var(--ink2);margin:12px 0 14px;line-height:1.6}
+.m-step{display:flex;gap:12px;padding:14px 0;border-top:1px solid var(--line)}
+.m-step:first-of-type{border-top:none}
+.m-num{width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.m-body{flex:1;min-width:0}
+.m-title{font-size:14px;font-weight:600;margin-bottom:3px}
+.m-text{font-size:13px;color:var(--ink2);line-height:1.55;margin-bottom:9px}
+.m-req{display:inline-block;background:var(--red);color:#fff;font-size:10px;font-weight:700;letter-spacing:.06em;padding:2px 7px;border-radius:9px;margin-left:6px;vertical-align:middle}
+.m-box{background:var(--s2);border:1px solid var(--line);border-radius:var(--r);padding:9px 12px;font-family:var(--mono);font-size:12px;word-break:break-word;user-select:all;margin-bottom:9px}
+.m-recip{background:var(--s2);border:1px solid var(--line);border-radius:var(--r);padding:6px 12px;margin-bottom:9px}
+.m-recip-row{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;padding:4px 0;border-bottom:1px solid var(--line);font-size:12px}
+.m-recip-row:last-child{border-bottom:none}
+.m-recip-row span{font-family:var(--mono);color:var(--ink3);word-break:break-all}
+.m-missing{font-size:11px;color:var(--amber);margin-bottom:9px}
+.btn-copy{background:var(--blue);color:#fff;border-color:var(--blue);font-weight:600}
+.btn-copy:hover{background:var(--blue-d)}
+.btn-copy.copied{background:var(--green);border-color:var(--green)}
+.m-details summary{cursor:pointer;font-size:12px;color:var(--ink3);margin-top:2px}
+.m-details textarea{width:100%;height:150px;margin-top:8px;padding:9px 12px;border:1px solid var(--line);border-radius:var(--r);font-family:var(--mono);font-size:11px;color:var(--ink);background:var(--surface);resize:vertical}
 
 @media(max-width:560px){
   .g2,.g3{grid-template-columns:1fr}
@@ -231,6 +258,12 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     <div id="successDest" style="background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:12px; font-size:12px"></div>
   </div>
 
+  <div class="manual-box">
+    <div class="manual-box-t">¿No se ha abierto tu correo o no ves el mensaje?</div>
+    <div class="manual-box-s">No pasa nada: puedes copiar el contenido y enviarlo tú mismo/a desde tu correo de Osakidetza.</div>
+    <button class="btn btn-secondary" onclick="openManual()">📋 Copiar contenido para envío manual</button>
+  </div>
+
   <button class="btn btn-primary" onclick="resetAll()">Nueva solicitud</button>
 </div>
 
@@ -261,6 +294,73 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   </div>
 </div>
 
+<!-- AVISO: ENVÍO MANUAL -->
+<div class="overlay" id="manualOverlay">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-ttl">Cómo enviar el email manualmente</div>
+      <button class="modal-x" onclick="closeManual()">✕</button>
+    </div>
+
+    <div id="manualStatus" class="notice n-ok" style="margin-bottom:0"></div>
+    <div class="m-hint">Sigue los pasos <strong>en orden</strong>. Cada botón «Copiar» sustituye lo que habías copiado antes.</div>
+
+    <div class="m-step">
+      <div class="m-num">1</div>
+      <div class="m-body">
+        <div class="m-title">Abre tu correo</div>
+        <div class="m-text">Abre el programa que usas para el correo (por ejemplo Outlook) o entra en tu correo corporativo de Osakidetza, y crea un mensaje nuevo.</div>
+      </div>
+    </div>
+
+    <div class="m-step">
+      <div class="m-num">2</div>
+      <div class="m-body">
+        <div class="m-title">Pega el contenido</div>
+        <div class="m-text">El contenido ya está copiado. Pégalo en el cuerpo del mensaje (teclas <strong>Ctrl + V</strong>, o en el móvil mantén pulsado y elige «Pegar»).</div>
+        <button class="btn btn-sm btn-copy" id="btnCopyBody" onclick="copyWithFeedback(this, lastEmail.body)">📋 Copiar contenido de nuevo</button>
+        <details class="m-details" id="manualDetails">
+          <summary>Ver el texto que se copia</summary>
+          <textarea id="manualBody" readonly></textarea>
+        </details>
+      </div>
+    </div>
+
+    <div class="m-step">
+      <div class="m-num">3</div>
+      <div class="m-body">
+        <div class="m-title">Pega el asunto <span class="m-req">OBLIGATORIO</span></div>
+        <div class="m-text">Copia el asunto y pégalo en la casilla «Asunto». Sin el asunto, la Supervisión no podrá registrar el cambio.</div>
+        <div class="m-box" id="manualSubject"></div>
+        <button class="btn btn-sm btn-copy" onclick="copyWithFeedback(this, lastEmail.subject)">📋 Copiar asunto</button>
+      </div>
+    </div>
+
+    <div class="m-step">
+      <div class="m-num">4</div>
+      <div class="m-body">
+        <div class="m-title">Añade los destinatarios</div>
+        <div class="m-text">Copia la lista y pégala en la casilla «Para». Los correos ya van separados.</div>
+        <div class="m-recip" id="manualRecipients"></div>
+        <div class="m-missing" id="manualMissing" style="display:none"></div>
+        <button class="btn btn-sm btn-copy" onclick="copyWithFeedback(this, lastEmail.recipients.map(r => r.email).join('; '))">📋 Copiar destinatarios</button>
+      </div>
+    </div>
+
+    <div class="m-step">
+      <div class="m-num">5</div>
+      <div class="m-body">
+        <div class="m-title">Envía el mensaje</div>
+        <div class="m-text" style="margin-bottom:0">Revisa que el asunto, el contenido y los destinatarios estén puestos y pulsa «Enviar».</div>
+      </div>
+    </div>
+
+    <div class="modal-ft">
+      <button class="btn btn-primary" onclick="closeManual()">Entendido</button>
+    </div>
+  </div>
+</div>
+
 <script>
 'use strict';
 
@@ -286,6 +386,7 @@ let nextPersonaId = 1;
 let personas = [];
 let legCount = 0;
 let sending  = false;
+let lastEmail = null; // { subject, body, recipients:[{nombre,email}], sinEmail:[nombres] }
 
 const STAG_CSS = { 'Mañana':'stag-M', 'Tarde':'stag-T', 'Noche':'stag-N' };
 
@@ -716,13 +817,19 @@ function doSend() {
     })
   };
 
-  // Recopilar correos para Copia (CC)
-  const ccEmails = [];
-  personas.forEach(p => {
-    if (!p.skip && p.email.trim() !== '') {
-      ccEmails.push(p.email.trim());
+  // Destinatarios: supervisión + personas con email que no se hayan excluido
+  const recipients = [{ nombre: CONFIG.supervisor.nombre, email: CONFIG.supervisor.email }];
+  const sinEmail = [];
+  personas.forEach((p, i) => {
+    if (p.skip) return;
+    const em = p.email.trim();
+    const nm = p.nombre.trim() || `Persona ${i+1}`;
+    if (!em) { sinEmail.push(nm); return; }
+    if (!recipients.some(r => r.email.toLowerCase() === em.toLowerCase())) {
+      recipients.push({ nombre: nm, email: em });
     }
   });
+  const ccEmails = recipients.slice(1).map(r => r.email);
 
   const now = new Date();
   const yyyy = now.getFullYear();
@@ -732,8 +839,14 @@ function doSend() {
   const min = String(now.getMinutes()).padStart(2, '0');
   const dateStr = `${yyyy}${mm}${dd}${hh}${min}`;
 
-  const subject = encodeURIComponent(`[Intercambio Turnos] ${dateStr}_${sol}`);
-  const body    = encodeURIComponent(buildEmailPlain(payload));
+  const rawSubject = `[Intercambio Turnos] ${dateStr}_${sol}`;
+  const rawBody    = buildEmailPlain(payload);
+
+  // Guardamos el email por si hay que enviarlo manualmente
+  lastEmail = { subject: rawSubject, body: rawBody, recipients, sinEmail };
+
+  const subject = encodeURIComponent(rawSubject);
+  const body    = encodeURIComponent(rawBody);
   
   let mailtoStr = `mailto:${CONFIG.supervisor.email}?subject=${subject}`;
   if (ccEmails.length > 0) {
@@ -771,6 +884,94 @@ function buildEmailPlain(p) {
   if (p.alerta) t += `\nALERTA: ${p.alerta}\n`;
   return t;
 }
+
+/* ─── ENVÍO MANUAL (copiar al portapapeles) ──────────────────────── */
+async function copyText(text) {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch (e) { /* se prueba el método alternativo */ }
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.top = '0';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, text.length);
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    return ok;
+  } catch (e) {
+    return false;
+  }
+}
+
+async function copyWithFeedback(btn, text) {
+  if (!btn.dataset.label) btn.dataset.label = btn.innerHTML;
+  const ok = await copyText(text);
+  btn.innerHTML = ok ? '✓ Copiado' : 'No se pudo copiar';
+  btn.classList.toggle('copied', ok);
+  if (!ok) setManualStatus(false);
+  clearTimeout(btn._t);
+  btn._t = setTimeout(() => {
+    btn.innerHTML = btn.dataset.label;
+    btn.classList.remove('copied');
+  }, 2200);
+}
+
+function setManualStatus(ok) {
+  const st = document.getElementById('manualStatus');
+  if (ok) {
+    st.className = 'notice n-ok';
+    st.innerHTML = '✓ <strong>El contenido del email ya está copiado.</strong> Solo tienes que pegarlo (paso 2).';
+  } else {
+    st.className = 'notice n-warn';
+    st.innerHTML = '⚠ <strong>Tu navegador no permite copiar automáticamente.</strong> Abre «Ver el texto que se copia» en el paso 2, selecciona todo el texto y cópialo con Ctrl + C. Haz lo mismo con el asunto y los destinatarios.';
+    document.getElementById('manualDetails').open = true;
+  }
+}
+
+async function openManual() {
+  if (!lastEmail) return;
+
+  document.getElementById('manualSubject').textContent = lastEmail.subject;
+  document.getElementById('manualBody').value = lastEmail.body;
+  document.getElementById('manualDetails').open = false;
+
+  document.getElementById('manualRecipients').innerHTML = lastEmail.recipients.map(r =>
+    `<div class="m-recip-row"><strong>${esc(r.nombre)}</strong><span>${esc(r.email)}</span></div>`
+  ).join('');
+
+  const miss = document.getElementById('manualMissing');
+  if (lastEmail.sinEmail.length) {
+    miss.style.display = 'block';
+    miss.textContent = `Sin email indicado (no recibirán el aviso): ${lastEmail.sinEmail.join(', ')}`;
+  } else {
+    miss.style.display = 'none';
+  }
+
+  document.getElementById('manualOverlay').classList.add('on');
+
+  // El contenido se copia nada más abrir el aviso
+  const ok = await copyText(lastEmail.body);
+  setManualStatus(ok);
+}
+
+function closeManual() {
+  document.getElementById('manualOverlay').classList.remove('on');
+}
+
+document.addEventListener('click', e => {
+  if (e.target.id === 'manualOverlay') closeManual();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeManual();
+});
 
 /* ─── SUCCESS SCREEN ─────────────────────────────────────────────── */
 function showSuccess(id, legs, bal) {
@@ -836,6 +1037,8 @@ function showSuccess(id, legs, bal) {
 function resetAll() {
   personas = [];
   nextPersonaId = 1;
+  lastEmail = null;
+  closeManual();
   document.getElementById('personasContainer').innerHTML = '';
   addPersona();
   addPersona();
